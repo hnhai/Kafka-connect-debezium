@@ -1,0 +1,26 @@
+version: '3.2'
+services:
+  kafka-rest:
+   image: confluentinc/cp-kafka-rest:5.2.1
+   environment:
+     KAFKA_HEAP_OPTS: "-Xms256M -Xmx256M"
+     KAFKA_REST_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092,kafka3:9092
+     KAFKA_REST_LISTENERS: http://0.0.0.0:8082 
+     KAFKA_REST_HOST_NAME: kafka-rest
+   networks:
+   - cluster
+
+  kafka-topic-ui:
+   image: landoop/kafka-topics-ui
+   environment:
+     PROXY: "true"
+     KAFKA_REST_PROXY_URL: http://kafka-rest:8082
+   ports:
+   - "8200:8000"
+   networks:
+   - cluster
+
+networks:
+  cluster:
+    external:
+      name: cluster

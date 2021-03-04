@@ -1,0 +1,76 @@
+version: '3.2'
+services:
+  zookeeper1:
+    image: confluentinc/cp-zookeeper:5.2.1
+    environment:
+      KAFKA_HEAP_OPTS: "-Xms512M -Xmx512M"
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 3
+      ZOOKEEPER_SERVERS: 0.0.0.0:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+    networks:
+    - cluster
+    volumes:
+    - /var/lib/zookeeper1/data:/var/lib/zookeeper/data
+    - /var/lib/zookeeper1/log:/var/lib/zookeeper/log
+    logging:
+      options:
+        max-size: "50M"
+    ports:
+    - target: 2181
+      published: 2181
+      mode: host
+    deploy:
+      placement:
+        constraints:
+        - node.labels.microservices_01 == true
+
+  zookeeper2:
+    image: confluentinc/cp-zookeeper:5.2.1
+    environment:
+      KAFKA_HEAP_OPTS: "-Xms512M -Xmx512M"
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 3
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;0.0.0.0:2888:3888;zookeeper3:2888:3888
+    networks:
+    - cluster
+    volumes:
+    - /var/lib/zookeeper2/data:/var/lib/zookeeper/data
+    - /var/lib/zookeeper2/log:/var/lib/zookeeper/log
+    logging:
+      options:
+        max-size: "50M"
+    ports:
+    - 2881:2881
+    
+
+  zookeeper3:
+    image: confluentinc/cp-zookeeper:5.2.1
+    environment:
+      KAFKA_HEAP_OPTS: "-Xms512M -Xmx512M"
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 3
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;0.0.0.0:2888:3888
+    networks:
+    - cluster
+    volumes:
+    - /var/lib/zookeeper3/data:/var/lib/zookeeper/data
+    - /var/lib/zookeeper3/log:/var/lib/zookeeper/log
+    logging:
+      options:
+        max-size: "50M"
+    ports:
+    - 2181:2181
+
+networks:
+  cluster:
+    external:
+      name: cluster
